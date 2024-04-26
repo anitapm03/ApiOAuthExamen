@@ -26,6 +26,13 @@ namespace ApiOAuthExamen.Controllers
         }
 
         [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<List<Cubo>>> GetCubosBlob()
+        {
+            return await this.repo.GetCubosBlobAsync();
+        }
+
+        [HttpGet]
         [Route("[action]/{marca}")]
         public async Task<ActionResult<List<Cubo>>> GetCubosMarca(string marca)
         {
@@ -48,6 +55,14 @@ namespace ApiOAuthExamen.Controllers
         public async Task<ActionResult<UsuarioCubo>> FindUsuario(int id)
         {
             return await this.repo.FindUsuarioAsync(id);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("[action]/{id}")]
+        public async Task<ActionResult<UsuarioCubo>> FindUsuarioBlob(int id)
+        {
+            return await this.repo.FindUsuarioBlobAsync(id);
         }
 
         [HttpGet]

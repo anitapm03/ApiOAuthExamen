@@ -1,5 +1,6 @@
 ﻿using ApiOAuthExamen.Data;
 using ApiOAuthExamen.Models;
+using ApiOAuthExamen.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiOAuthExamen.Repositories
@@ -7,10 +8,13 @@ namespace ApiOAuthExamen.Repositories
     public class RepositoryCubos
     {
         private CubosContext context;
+        private ServiceStorageBlobs serviceBlobs;
 
-        public RepositoryCubos(CubosContext context)
+        public RepositoryCubos(CubosContext context,
+            ServiceStorageBlobs serviceBlobs)
         {
             this.context = context;
+            this.serviceBlobs = serviceBlobs;
         }
 
         public async Task<UsuarioCubo>
@@ -28,6 +32,21 @@ namespace ApiOAuthExamen.Repositories
         public async Task<List<Cubo>> GetCubosAsync()
         {
             return await this.context.Cubos.ToListAsync();
+        }
+
+        //lista cubos
+        public async Task<List<Cubo>> GetCubosBlobAsync()
+        {
+            List<Cubo> cubos = await this.context.Cubos.ToListAsync();
+            //List<Cubo> cubosBlob = new List<Cubo>();
+            foreach (Cubo c in cubos)
+            {
+                string urlBlob = this.serviceBlobs.GetContainerUrl("examenana");
+                c.Imagen = urlBlob + "/" + c.Imagen;
+                
+            }
+
+            return cubos;
         }
 
         //filtrar por marca
@@ -69,6 +88,27 @@ namespace ApiOAuthExamen.Repositories
             return await
                 this.context.Usuarios
                 .FirstOrDefaultAsync(x => x.IdUsuario == id);
+        }
+
+        //find usuario con blob
+        public async Task<UsuarioCubo> FindUsuarioBlobAsync(int id)
+        {
+            UsuarioCubo user = await
+                this.context.Usuarios
+                .FirstOrDefaultAsync(x => x.IdUsuario == id);
+            string urlBlob = this.serviceBlobs.GetContainerUrl("examenana");
+
+            UsuarioCubo userblob = new UsuarioCubo();
+            userblob.IdUsuario = user.IdUsuario;
+            userblob.Nombre = user.Nombre;
+            userblob.Email = user.Email;
+            userblob.Pass = user.Pass;
+            userblob.Imagen = urlBlob + "/" + user.Imagen;
+
+            return userblob;
+            /*return await
+                this.context.Usuarios
+                .FirstOrDefaultAsync(x => x.IdUsuario == id);*/
         }
 
         //pedidos user
